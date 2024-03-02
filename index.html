@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einkaufsliste</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        
+        #container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        #inputItem,
+        #addBtn {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        #itemList {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        .item button {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <h2>Einkaufsliste</h2>
+        <input type="text" id="inputItem" placeholder="Neues Element hinzufügen">
+        <button id="addBtn" onclick="addItem()">Hinzufügen</button>
+        <ul id="itemList"></ul>
+    </div>
+
+    <script>
+        // Funktion zum Laden der gespeicherten Liste beim Start der Seite
+        document.addEventListener('DOMContentLoaded', function() {
+            loadItems();
+        });
+
+        function addItem() {
+            var inputItem = document.getElementById("inputItem");
+            var itemList = document.getElementById("itemList");
+
+            if (inputItem.value.trim() !== "") {
+                var li = document.createElement("li");
+                li.className = "item";
+                li.textContent = inputItem.value;
+                var removeButton = document.createElement("button");
+                removeButton.onclick = function() {
+                    removeItem(li);
+                };
+                li.appendChild(removeButton);
+                itemList.appendChild(li);
+                inputItem.value = "";
+
+                // Liste im localStorage aktualisieren
+                saveItems();
+            }
+        }
+
+        function removeItem(item) {
+            var itemList = document.getElementById("itemList");
+            itemList.removeChild(item);
+
+            // Liste im localStorage aktualisieren
+            saveItems();
+        }
+
+        function saveItems() {
+            var itemList = document.getElementById("itemList");
+            var items = [];
+            for (var i = 0; i < itemList.children.length; i++) {
+                items.push(itemList.children[i].textContent.trim());
+            }
+            localStorage.setItem("shoppingList", JSON.stringify(items));
+        }
+
+        function loadItems() {
+            var itemList = document.getElementById("itemList");
+            var storedItems = localStorage.getItem("shoppingList");
+
+            if (storedItems) {
+                var items = JSON.parse(storedItems);
+                items.forEach(function(item) {
+                    var li = document.createElement("li");
+                    li.className = "item";
+                    li.textContent = item;
+                    var removeButton = document.createElement("button");
+                    removeButton.textContent = "Entfernen";
+                    removeButton.onclick = function() {
+                        removeItem(li);
+                    };
+                    li.appendChild(removeButton);
+                    itemList.appendChild(li);
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
