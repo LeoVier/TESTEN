@@ -62,70 +62,48 @@
     </div>
 
     <script>
-        // Funktion zum Laden der gespeicherten Liste beim Start der Seite
-        document.addEventListener('DOMContentLoaded', function() {
-            loadItems();
-        });
+        async function loadItems() {
+            const response = await fetch('shoppingList.json');
+            const data = await response.json();
 
-        function addItem() {
-            var inputItem = document.getElementById("inputItem");
-            var itemList = document.getElementById("itemList");
+            const itemList = document.getElementById('itemList');
+            itemList.innerHTML = '';
 
-            if (inputItem.value.trim() !== "") {
-                var li = document.createElement("li");
-                li.className = "item";
-                li.textContent = inputItem.value;
-                var removeButton = document.createElement("button");
-                removeButton.onclick = function() {
-                    removeItem(li);
-                };
-                li.appendChild(removeButton);
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'item';
+                li.textContent = item;
                 itemList.appendChild(li);
-                inputItem.value = "";
-
-                // Liste im localStorage aktualisieren
-                saveItems();
-            }
+            });
         }
 
-        function removeItem(item) {
-            var itemList = document.getElementById("itemList");
-            itemList.removeChild(item);
+        async function addItem() {
+            const inputItem = document.getElementById('inputItem');
+            const newItem = inputItem.value.trim();
 
-            // Liste im localStorage aktualisieren
-            saveItems();
-        }
+            if (newItem !== '') {
+                const response = await fetch('shoppingList.json');
+                const data = await response.json();
 
-        function saveItems() {
-            var itemList = document.getElementById("itemList");
-            var items = [];
-            for (var i = 0; i < itemList.children.length; i++) {
-                items.push(itemList.children[i].textContent.trim());
-            }
-            localStorage.setItem("shoppingList", JSON.stringify(items));
-        }
+                data.push(newItem);
 
-        function loadItems() {
-            var itemList = document.getElementById("itemList");
-            var storedItems = localStorage.getItem("shoppingList");
-
-            if (storedItems) {
-                var items = JSON.parse(storedItems);
-                items.forEach(function(item) {
-                    var li = document.createElement("li");
-                    li.className = "item";
-                    li.textContent = item;
-                    var removeButton = document.createElement("button");
-                    removeButton.textContent = "Entfernen";
-                    removeButton.onclick = function() {
-                        removeItem(li);
-                    };
-                    li.appendChild(removeButton);
-                    itemList.appendChild(li);
+                await fetch('shoppingList.json', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
                 });
+
+                inputItem.value = '';
+                loadItems(); // Reload the list after adding an item
             }
         }
+
+        // Load items on page load
+        document.addEventListener('DOMContentLoaded', loadItems);
     </script>
+
 </body>
 
 </html>
