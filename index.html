@@ -62,48 +62,70 @@
     </div>
 
     <script>
-        async function loadItems() {
-            const response = await fetch('shoppingList.json');
-            const data = await response.json();
+        // Funktion zum Laden der gespeicherten Liste beim Start der Seite
+        document.addEventListener('DOMContentLoaded', function() {
+            loadItems();
+        });
 
-            const itemList = document.getElementById('itemList');
-            itemList.innerHTML = '';
+        function addItem() {
+            var inputItem = document.getElementById("inputItem");
+            var itemList = document.getElementById("itemList");
 
-            data.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'item';
-                li.textContent = item;
+            if (inputItem.value.trim() !== "") {
+                var li = document.createElement("li");
+                li.className = "item";
+                li.textContent = inputItem.value;
+                var removeButton = document.createElement("button");
+                removeButton.onclick = function() {
+                    removeItem(li);
+                };
+                li.appendChild(removeButton);
                 itemList.appendChild(li);
-            });
-        }
+                inputItem.value = "";
 
-        async function addItem() {
-            const inputItem = document.getElementById('inputItem');
-            const newItem = inputItem.value.trim();
-
-            if (newItem !== '') {
-                const response = await fetch('shoppingList.json');
-                const data = await response.json();
-
-                data.push(newItem);
-
-                await fetch('shoppingList.json', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                inputItem.value = '';
-                loadItems(); // Reload the list after adding an item
+                // Liste im localStorage aktualisieren
+                saveItems();
             }
         }
 
-        // Load items on page load
-        document.addEventListener('DOMContentLoaded', loadItems);
-    </script>
+        function removeItem(item) {
+            var itemList = document.getElementById("itemList");
+            itemList.removeChild(item);
 
+            // Liste im localStorage aktualisieren
+            saveItems();
+        }
+
+        function saveItems() {
+            var itemList = document.getElementById("itemList");
+            var items = [];
+            for (var i = 0; i < itemList.children.length; i++) {
+                items.push(itemList.children[i].textContent.trim());
+            }
+            localStorage.setItem("shoppingList", JSON.stringify(items));
+        }
+
+        function loadItems() {
+            var itemList = document.getElementById("itemList");
+            var storedItems = localStorage.getItem("shoppingList");
+
+            if (storedItems) {
+                var items = JSON.parse(storedItems);
+                items.forEach(function(item) {
+                    var li = document.createElement("li");
+                    li.className = "item";
+                    li.textContent = item;
+                    var removeButton = document.createElement("button");
+                    removeButton.textContent = "Entfernen";
+                    removeButton.onclick = function() {
+                        removeItem(li);
+                    };
+                    li.appendChild(removeButton);
+                    itemList.appendChild(li);
+                });
+            }
+        }
+    </script>
 </body>
 
 </html>
